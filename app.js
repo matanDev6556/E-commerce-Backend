@@ -1,11 +1,14 @@
 require('dotenv').config();
-const express = require('express');
-
-const app = express();
+const createServer = require('./server');
+const connectToDb = require('./config/db');
 
 const host = process.env.HOST;
 const port = process.env.PORT;
 
-app.listen(port, host, () => {
-  console.log(`server running at https//${host}:${port}`);
-});
+(async () => {
+  await connectToDb();
+  const app = createServer();
+  app.listen(port, host, () => {
+    console.log(`server running at https//${host}:${port}`);
+  });
+})();
