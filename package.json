@@ -1,0 +1,25 @@
+{
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "nodemon": "^3.1.9"
+  },
+  "name": "e-commerce-",
+  "version": "1.0.0",
+  "description": "Full stack E commerce app ",
+  "main": "app.js",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/matanDev6556/E-commerce-Full-stack-.git"
+  },
+  "author": "matankalifa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/matanDev6556/E-commerce-Full-stack-/issues"
+  },
+  "homepage": "https://github.com/matanDev6556/E-commerce-Full-stack-#readme"
+}
