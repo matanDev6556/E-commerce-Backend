@@ -12,6 +12,7 @@ exports.validate = (validations) => {
       console.log(errosMsgs);
       return res.status(400).json({ errors: errosMsgs });
     }
+
     next();
   };
 };

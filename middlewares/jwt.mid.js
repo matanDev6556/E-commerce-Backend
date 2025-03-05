@@ -9,27 +9,32 @@ function authJwt() {
     isRevoked: isRevoked,
   }).unless({
     path: [
-      `/${API}/auth/login`,
-      `/${API}/auth/login/`,
+      `${API}/auth/login`,
+      `${API}/auth/login/`,
 
-      `/${API}/auth/register`,
+      `${API}/auth/register`,
       `${API}/auth/register/`,
 
-      `/${API}/auth/forgot-password`,
+      `${API}/auth/forgot-password`,
       `${API}/auth/forgot-password/`,
 
-      `/${API}/auth/verify-otp`,
-      `/${API}/auth/verify-otp/`,
+      `${API}/auth/verify-otp`,
+      `${API}/auth/verify-otp/`,
 
-      `/${API}/auth/reset-password`,
-      `/${API}/auth/reset-password/`,
+      `${API}/auth/reset-password`,
+      `${API}/auth/reset-password/`,
     ],
   });
 }
 
 async function isRevoked(req, jwt) {
   const authHeader = req.header('Authorization');
-  if (!authHeader.staartswith('Bearer')) {
+  console.log('authHeader', authHeader);
+  if (!authHeader) {
+    return false;
+  }
+
+  if (!authHeader.startsWith('Bearer')) {
     return true;
   }
 

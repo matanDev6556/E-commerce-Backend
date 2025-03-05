@@ -1,6 +1,7 @@
 require('dotenv').config();
 const createServer = require('./server');
 const connectToDb = require('./config/db');
+require('./config/di');
 
 const host = process.env.HOST;
 const port = process.env.PORT;

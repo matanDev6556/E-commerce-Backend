@@ -1,186 +1,88 @@
-const { User } = require('../models/user');
-const { Token } = require('../models/token');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const mailSender = require('../helpers/email_sender');
+const { validationResult } = require('express-validator');
 
-exports.register = async (req, res) => {
-  try {
-    let user = new User({
-      ...req.body,
-      passwordHash: bcrypt.hashSync(req.body.password, 8),
-    });
-
-    user = await user.save();
-
-    return res.status(201).json(user);
-  } catch (err) {
-    if (err.message.includes('email_1 dup key')) {
-      return res.status(409).json({
-        type: 'AuthError',
-        message: 'User with that email already exists!',
-      });
-    }
-    console.error(error);
-    return res.status(500).json({ error: err.message || err });
+class AuthController {
+  constructor(authService) {
+    this.authService = authService;
   }
-};
 
-exports.login = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: 'User not found \n check youre email' });
+  register = async (req, res, next) => {
+    try {
+      const user = await this.authService.register(req.body);
+      res.status(201).json({ success: true, data: user });
+    } catch (error) {
+      next(error);
     }
-    if (!bcrypt.compareSync(password, user.passwordHash)) {
-      return res.status(400).json({ message: 'Incorrect password!' });
-    }
-    const accessToken = jwt.sign(
-      { id: user.id, isAdmin: user.isAdmin },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '24h' }
-    );
+  };
 
-    const refreshToken = jwt.sign(
-      { id: user.id, isAdmin: user.isAdmin },
-      process.env.REFRESH_TOKEN_SECRET,
-      {
-        expiresIn: '60d',
+  login = async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
+      console.log(`email - ${email} , pass -  ${password}`);
+      const { user, accessToken } = await this.authService.login(
+        email,
+        password
+      );
+      res.json({ success: true, data: { ...user._doc, accessToken } });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  verifyToken = async (req, res, next) => {
+    try {
+      const accessToken = req.headers.authorization
+        ?.replace('Bearer ', '')
+        .trim();
+      const isValid = await this.authService.verifyToken(accessToken);
+      res.json({ success: true, data: isValid });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  forgotPassword = async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      const response = await this.authService.forgotPassword(email);
+      res.json({ success: true, ...response });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  verifyPasswordResetOTP = async (req, res, next) => {
+    try {
+      const { email, otp } = req.body;
+      const response = await this.authService.verifyPasswordResetOTP(
+        email,
+        otp
+      );
+      res.json({ success: true, ...response });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  resetPassword = async (req, res, next) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          success: false,
+          errors: errors.array().map((error) => ({
+            field: error.path,
+            message: error.msg,
+          })),
+        });
       }
-    );
 
-    const token = Token.findOne({ userId: user.id });
-    if (token) await token.deleteOne();
-    await new Token({
-      userId: user.id,
-      accessToken,
-      refreshToken,
-    }).save();
-
-    user.passwordHash = undefined;
-    return res.json({ ...user._doc, accessToken });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: error.message || error });
-  }
-};
-
-exports.verifyToken = async (req, res) => {
-  try {
-    let accessToken = req.headers.authorization;
-    if (!accessToken) return res.json(false);
-    accessToken = accessToken.replace('Bearer', '').trim();
-
-    const token = await Token.findOne({ accessToken });
-    if (!token) return res.json(false);
-
-    const tokenData = jwt.decode(token.refreshToken);
-    const user = await User.findById(tokenData.userId);
-    if (!user) return res.json(false);
-
-    const isValid = jwt.verify(
-      token.refreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
-    if (!isValid) return res.json(false);
-
-    return res.json(true);
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ type: error.name, message: error.message });
-  }
-};
-
-exports.forgotPassword = async function (req, res) {
-  try {
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res
-        .status(404)
-        .json({ message: 'User with that email does NOT exist!' });
+      const { email, newPassword } = req.body;
+      const response = await this.authService.resetPassword(email, newPassword);
+      res.json({ success: true, ...response });
+    } catch (error) {
+      next(error);
     }
+  };
+}
 
-    const otp = Math.floor(1000 + Math.random() * 9000);
-
-    user.resetPasswordOtp = otp;
-    user.resetPasswordOtpExpires = Date.now() + 600000;
-
-    await user.save();
-
-    const response = await mailSender.sendMail(
-      email,
-      'Password Reset OTP',
-      `Your OTP for password reset is: ${otp}`
-    );
-    return res.json({ message: response });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ type: error.name, message: error.message });
-  }
-};
-
-exports.verifyPasswordResetOTP = async function (req, res) {
-  try {
-    const { email, otp } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found!' });
-    }
-
-    if (
-      user.resetPasswordOtp !== +otp ||
-      Date.now() > user.resetPasswordOtpExpires
-    ) {
-      return res.status(401).json({ message: 'Invalid or expired OTP' });
-    }
-    user.resetPasswordOtp = 1;
-    user.resetPasswordOtpExpires = undefined;
-
-    await user.save();
-    return res.json({ message: 'OTP confirmed successfully.' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ type: error.name, message: error.message });
-  }
-};
-
-exports.resetPassword = async function (req, res) {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    const errorMessages = errors.array().map((error) => ({
-      field: error.path,
-      message: error.msg,
-    }));
-    return res.status(400).json({ errors: errorMessages });
-  }
-  try {
-    const { email, newPassword } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: 'User not found!' });
-    }
-
-    if (user.resetPasswordOtp !== 1) {
-      return res
-        .status(401)
-        .json({ message: 'Confirm OTP before resetting password.' });
-    }
-
-    user.passwordHash = bcrypt.hashSync(newPassword, 8);
-    user.resetPasswordOtp = undefined;
-    await user.save();
-
-    return res.json({ message: 'Password reset successfully' });
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ type: error.name, message: error.message });
-  }
-};
+module.exports = AuthController;
