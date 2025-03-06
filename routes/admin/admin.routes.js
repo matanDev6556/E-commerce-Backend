@@ -8,8 +8,9 @@ const orderAdminRoutes = require('./order.admin.routes');
 module.exports = (
   userAdminController,
   categoryAdminController,
-  productAdminController,
-  orderAdminController
+  orderAdminController,
+
+  productAdminController
 ) => {
   // Users
   router.use('/users', userAdminRoutes(userAdminController));
@@ -17,11 +18,11 @@ module.exports = (
   // Categories
   router.use('/categories', categoryAdminRoutes(categoryAdminController));
 
+  // Orders
+  router.use('/orders', orderAdminRoutes(orderAdminController));
+
   // Products
   //router.use('/products', productAdminRoutes(productAdminController));
-
-  // Orders
-  //router.use('/orders', orderAdminRoutes(orderAdminController));
 
   return router;
 };

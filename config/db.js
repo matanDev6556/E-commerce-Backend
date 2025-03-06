@@ -1,4 +1,8 @@
 const mongoose = require('mongoose');
+const { Category } = require('../models/category');
+const { Product } = require('../models/product');
+const { OrderItem } = require('../models/order_item');
+const { Order } = require('../models/order');
 
 module.exports = async () => {
   try {
@@ -12,3 +16,4 @@ module.exports = async () => {
     process.exit(1);
   }
 };
+
