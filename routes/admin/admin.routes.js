@@ -2,14 +2,13 @@ const express = require('express');
 const router = express.Router();
 const userAdminRoutes = require('./user.admin.routes');
 const categoryAdminRoutes = require('./category.admin.routes');
-const productAdminRoutes = require('./product.admin.routes');
 const orderAdminRoutes = require('./order.admin.routes');
+const productAdminRoutes = require('./product.admin.routes');
 
 module.exports = (
   userAdminController,
   categoryAdminController,
   orderAdminController,
-
   productAdminController
 ) => {
   // Users
@@ -22,7 +21,7 @@ module.exports = (
   router.use('/orders', orderAdminRoutes(orderAdminController));
 
   // Products
-  //router.use('/products', productAdminRoutes(productAdminController));
+  router.use('/products', productAdminRoutes(productAdminController));
 
   return router;
 };

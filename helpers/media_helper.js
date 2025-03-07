@@ -40,33 +40,53 @@ const upload = multer({
   },
 });
 
+const deleteImages = async function (
+  imageUrls,
+  continueOnErrorName = 'ENOENT'
+) {
+  if (!Array.isArray(imageUrls)) {
+    throw new Error('imageUrls must be an array of strings');
+  }
 
+  console.log('🔍 Checking images to delete:', imageUrls);
 
-const  deleteImages = async function (imageUrls, continueOnErrorName = 'ENOENT') {
   try {
     await Promise.all(
       imageUrls.map(async (imageUrl) => {
+        if (typeof imageUrl !== 'string') {
+          console.error('❌ Skipping invalid image URL:', imageUrl);
+          return; // לא מנסה למחוק משהו שאינו מחרוזת
+        }
+
+        const filename = path.basename(imageUrl); // שולף רק את שם הקובץ
         const imagePath = path.resolve(
           __dirname,
           '..',
           'public',
           'uploads',
-          path.basename(imageUrl)
+          filename
         );
+
+        console.log(`🗑️ Trying to delete: ${imagePath}`);
+
         try {
           await fs.unlink(imagePath);
+          console.log(`✅ Deleted: ${filename}`);
         } catch (error) {
           if (error.code === continueOnErrorName) {
-            console.warn(`Continuing with the next image: ${error.message}`);
+            console.warn(`⚠️ File not found, skipping: ${filename}`);
           } else {
-            throw new Error(`Error deleting image ${imagePath}: ${error.message}`);
+            throw new Error(
+              `🚨 Error deleting image ${filename}: ${error.message}`
+            );
           }
         }
       })
     );
   } catch (error) {
-    throw error; 
+    console.error('❌ Failed to delete images:', error);
+    throw error;
   }
 };
 
-module.exports = { upload,deleteImages };
+module.exports = { upload, deleteImages };
