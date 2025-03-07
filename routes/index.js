@@ -7,10 +7,13 @@ const {
   categoryAdminController,
   orderAdminController,
   productAdminController,
+  categoryController,
 } = require('../config/di');
+const adminRoutes = require('./admin/admin.routes');
 const authRoutes = require('./auth.routes');
 const userRoutes = require('./users.routes');
-const adminRoutes = require('./admin/admin.routes');
+const categoryRoutes = require('./category.routes');
+
 
 // auth
 const authRouter = authRoutes(authController);
@@ -19,6 +22,10 @@ router.use('/auth', authRouter);
 //users
 const userRouter = userRoutes(userController);
 router.use('/users', userRouter);
+
+// category
+const categoryRouter = categoryRoutes(categoryController);
+router.use('/category', categoryRouter);
 
 // admin
 const adminRouter = adminRoutes(

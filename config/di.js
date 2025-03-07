@@ -20,6 +20,7 @@ const UserAdminController = require('../controllers/admin/user.admin.controller'
 const CategoryAdminController = require('../controllers/admin/category.admin.controller');
 const OrderAdminController = require('../controllers/admin/order.admin.controller');
 const ProductAdminController = require('../controllers/admin/product.admin.controller');
+const CategoryController = require('../controllers/category.controller');
 
 
 
@@ -43,6 +44,7 @@ const productService = new ProductService(productRepository,categoryRepository,r
 // controllers
 const authController = new AuthController(authService);
 const userController = new UserController(userService);
+const categoryController = new CategoryController(categoryService);
 //controllers - admin
 const userAdminController = new UserAdminController(userService);
 const categoryAdminController = new CategoryAdminController(categoryService);
@@ -52,10 +54,12 @@ const productAdminController = new ProductAdminController(productService);
 const dependencies = {
   authController,
   userController,
+  categoryController,
+  //admin controllers
   userAdminController,
   categoryAdminController,
   orderAdminController,
-  productAdminController
+  productAdminController,
 };
 
 module.exports = dependencies;
