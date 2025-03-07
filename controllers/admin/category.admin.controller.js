@@ -10,20 +10,18 @@ class CategoryAdminController {
         req.files,
         req
       );
-      return res.status(201).json({ success: true, data: category });
+      return res.status(201).json({ data: category });
     } catch (error) {
       if (error.cause?.status) {
         return res
           .status(error.cause.status)
           .json({ success: false, message: error.message });
       }
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Failed to add category',
-          error: error.message,
-        });
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to add category',
+        error: error.message,
+      });
     }
   };
 

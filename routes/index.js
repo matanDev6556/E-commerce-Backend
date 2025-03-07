@@ -5,8 +5,8 @@ const {
   userController,
   userAdminController,
   categoryAdminController,
-  //productAdminController,
-  //orderAdminController,
+  orderAdminController,
+  productAdminController,
 } = require('../config/di');
 const authRoutes = require('./auth.routes');
 const userRoutes = require('./users.routes');
@@ -24,8 +24,8 @@ router.use('/users', userRouter);
 const adminRouter = adminRoutes(
   userAdminController,
   categoryAdminController,
-  //productAdminController,
-  //orderAdminController
+  orderAdminController,
+  productAdminController
 );
 router.use('/admin', adminRouter);
 

@@ -1,5 +1,5 @@
 const { upload } = require('../helpers/media_helper');
 
-const uploadImage = upload.fields([{ name: 'image', maxCount: 1 }]);
+const uploadImage = (fieldsConfig) => upload.fields(fieldsConfig);
 
 module.exports = { uploadImage };

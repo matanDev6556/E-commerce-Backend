@@ -12,8 +12,8 @@ class UserRepository {
     return await user.save();
   }
 
-  async findById(id) {
-    return await User.findById({ _id: id }).select('name email phone');
+  async findById(id,selectedFields = '') {
+    return await User.findById({ _id: id }).select(selectedFields);
   }
 
   async update(userId, updateData) {

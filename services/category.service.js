@@ -1,8 +1,12 @@
-const { upload, deleteImages } = require('../helpers/media_helper');
+const { deleteImages } = require('../helpers/media_helper');
 
 class CategoryService {
   constructor(categoryRepository) {
     this.categoryRepository = categoryRepository;
+  }
+
+  async getCategories(){
+    return await this.categoryRepository.getCategories();
   }
 
   async addCategory(categoryData, files, req) {
