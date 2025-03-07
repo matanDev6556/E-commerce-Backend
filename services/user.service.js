@@ -11,8 +11,8 @@ class UserService {
     return users;
   }
 
-  async getUserById(userId) {
-    const user = await this.userRepository.findById(userId);
+  async getUserById(userId,selectedFields) {
+    const user = await this.userRepository.findById(userId,selectedFields);
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
     return user;
   }

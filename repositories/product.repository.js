@@ -8,6 +8,19 @@ class ProductRepository {
     }
   }
 
+  async getProducts(page = 1, limit = 10,selectedFields = '') {
+    try {
+      const products = await Product.find().select(selectedFields)
+        .skip((page - 1) * limit)
+        .limit(limit)
+        .lean();
+      return products;
+    } catch (error) {
+      console.error(error);
+      throw new Error(error);
+    }
+  }
+
   async getProductsCount() {
     try {
       const count = await Product.countDocuments();
@@ -22,16 +35,6 @@ class ProductRepository {
       this.#validateId(id);
       const product = await Product.findById(id);
       return product;
-    } catch (error) {
-      console.error(error);
-      throw new Error(error);
-    }
-  }
-
-  async getProducts() {
-    try {
-      const products = await Product.find();
-      return products;
     } catch (error) {
       console.error(error);
       throw new Error(error);

@@ -5,12 +5,24 @@ class ProductAdminController {
     this.productService = productService;
   }
 
-  getProducts = async (_, res) => {
+  getProducts = async (req, res) => {
     try {
-      const products = await this.productService.getProducts();
-      return res.json(products);
+      const { page = 1, limit = 10 } = req.query;
+      const result = await this.productService.getProducts(page, limit,'-reviews -rating');
+      return res.json(result);
     } catch (error) {
-      this.handleError(res, error, 'Failed to get products');
+      if (error.cause?.status) {
+        return res
+          .status(error.cause.status)
+          .json({ success: false, message: error.message });
+      }
+      res
+        .status(500)
+        .json({
+          success: false,
+          message: 'Failed to fetch products',
+          error: error.message,
+        });
     }
   };
 

@@ -2,9 +2,10 @@ const { deleteImages } = require('../helpers/media_helper');
 const { BASE_URL } = require('../config/index');
 
 class ProductService {
-  constructor(productRepository, categoryRepository) {
+  constructor(productRepository, categoryRepository, reviewRepository) {
     this.productRepository = productRepository;
     this.categoryRepository = categoryRepository;
+    this.reviewRepository = reviewRepository;
   }
 
   #handleProductImages(existingProduct, files) {
@@ -26,9 +27,35 @@ class ProductService {
     return { mainImageUrl, additionalImageUrls };
   }
 
-  async getProducts() {
-    const products = await this.productRepository.getProducts();
-    return products;
+  async getProducts(page = 1, limit = 10,selectedFields) {
+    page = parseInt(page, 10) || 1;
+    limit = parseInt(limit, 10) || 10;
+    if (page < 1) page = 1;
+    if (limit < 1 || limit > 100) limit = 10;
+
+    const products = await this.productRepository.getProducts(page, limit,selectedFields);
+    const totalCount = await this.productRepository.getProductsCount();
+    const totalPages = Math.ceil(totalCount / limit);
+
+    if (!products)
+      throw new Error('Products not found', {
+        cause: { status: 404 },
+      });
+
+    if (page > totalPages && totalPages > 0)
+      throw new Error('Page number exceeds total pages', {
+        cause: { status: 400 },
+      });
+
+    return {
+      data: products,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems: totalCount,
+        itemsPerPage: limit,
+      },
+    };
   }
 
   async getProductsCount() {
@@ -122,14 +149,10 @@ class ProductService {
       throw new Error('Product not found!', { cause: { status: 404 } });
 
     // delete images of this product
-    console.log(product);
+    await deleteImages([...product.image, product.images]);
 
-    if (String(product.image)) {
-      await deleteImages([product.image]);
-    }
-    if (String(product.images)) {
-      await deleteImages(product.images);
-    }
+    // delete the reviews of the product from reviews collection
+    await this.reviewRepository.deleteReviews(product.reviews);
 
     // delete the product
     await this.productRepository.deleteProduct(productId);

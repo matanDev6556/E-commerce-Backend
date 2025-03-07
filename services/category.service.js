@@ -5,6 +5,10 @@ class CategoryService {
     this.categoryRepository = categoryRepository;
   }
 
+  async getCategories(){
+    return await this.categoryRepository.getCategories();
+  }
+
   async addCategory(categoryData, files, req) {
     // Check if the image was uploaded
     const image = files['image']?.[0];
