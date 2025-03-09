@@ -8,21 +8,17 @@ class ProductAdminController {
   getProducts = async (req, res) => {
     try {
       const { page = 1, limit = 10 } = req.query;
-      const result = await this.productService.getProducts(page, limit,'-reviews -rating');
+      
+      // Call service with admin-specific options
+      const result = await this.productService.getProducts({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        isAdmin: true
+      });
+      
       return res.json(result);
     } catch (error) {
-      if (error.cause?.status) {
-        return res
-          .status(error.cause.status)
-          .json({ success: false, message: error.message });
-      }
-      res
-        .status(500)
-        .json({
-          success: false,
-          message: 'Failed to fetch products',
-          error: error.message,
-        });
+      this.handleError(res, error,'Failed to get products');
     }
   };
 

@@ -27,39 +27,76 @@ class ProductService {
     return { mainImageUrl, additionalImageUrls };
   }
 
-  async getProducts(page = 1, limit = 10,selectedFields) {
-    page = parseInt(page, 10) || 1;
-    limit = parseInt(limit, 10) || 10;
-    if (page < 1) page = 1;
-    if (limit < 1 || limit > 100) limit = 10;
+  async getProductById(id) {
+    try {
+      const product = await this.productRepository.getProductById(id);
+      return product;
+    } catch (error) {
+      throw new Error('Failed to fetch product', { cause: error });
+    }
+  }
 
-    const products = await this.productRepository.getProducts(page, limit,selectedFields);
-    const totalCount = await this.productRepository.getProductsCount();
-    const totalPages = Math.ceil(totalCount / limit);
+  async getProducts(options = {}) {
+    const {
+      page = 1,
+      limit = 10,
+      isAdmin = false,
+      searchText,
+      category,
+      criteria,
+    } = options;
 
-    if (!products)
-      throw new Error('Products not found', {
-        cause: { status: 404 },
-      });
+    // Build filters object (database-agnostic)
+    const filters = {};
 
-    if (page > totalPages && totalPages > 0)
-      throw new Error('Page number exceeds total pages', {
-        cause: { status: 400 },
-      });
+    // Add different filters based on user type and request params
+    if (!isAdmin) {
+      // Search text filter
+      if (searchText) {
+        filters.searchText = searchText;
+      }
 
+      // Category filter
+      if (category) {
+        filters.category = category;
+      }
+
+      // Special criteria
+      if (criteria) {
+        if (criteria === 'newArrivals') {
+          filters.isNewArrival = true;
+        } else if (criteria === 'popular') {
+          filters.isPopular = true;
+        }
+      }
+    }
+
+    // Choose fields to exclude based on user type
+    const excludeFields = isAdmin ? '-reviews -rating' : '';
+
+    // Get products with all filters applied
+    const { products, count } = await this.productRepository.getProducts(
+      filters,
+      { page, limit, excludeFields }
+    );
+
+    // Calculate pagination
+    const totalPages = Math.ceil(count / limit);
+
+    // Return formatted response
     return {
       data: products,
       pagination: {
         currentPage: page,
         totalPages,
-        totalItems: totalCount,
+        totalItems: count,
         itemsPerPage: limit,
       },
     };
   }
 
   async getProductsCount() {
-    const count = await this.productRepository.getProductsCount();
+    const count = await this.productRepository.getCountProducts();
     if (!count)
       throw new Error('Could not count products', { cause: { status: 500 } });
     return count;

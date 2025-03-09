@@ -4,24 +4,25 @@ const userAdminRoutes = require('./user.admin.routes');
 const categoryAdminRoutes = require('./category.admin.routes');
 const orderAdminRoutes = require('./order.admin.routes');
 const productAdminRoutes = require('./product.admin.routes');
-
-module.exports = (
+const {
   userAdminController,
   categoryAdminController,
   orderAdminController,
-  productAdminController
-) => {
-  // Users
-  router.use('/users', userAdminRoutes(userAdminController));
+  productAdminController,
+} = require('../../config/di');
 
-  // Categories
-  router.use('/categories', categoryAdminRoutes(categoryAdminController));
 
-  // Orders
-  router.use('/orders', orderAdminRoutes(orderAdminController));
 
-  // Products
-  router.use('/products', productAdminRoutes(productAdminController));
+// Users
+router.use('/users', userAdminRoutes(userAdminController));
 
-  return router;
-};
+// Categories
+router.use('/categories', categoryAdminRoutes(categoryAdminController));
+
+// Orders
+router.use('/orders', orderAdminRoutes(orderAdminController));
+
+// Products
+router.use('/products', productAdminRoutes(productAdminController));
+
+module.exports = router;

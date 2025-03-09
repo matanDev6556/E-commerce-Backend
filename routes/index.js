@@ -1,39 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const {
-  authController,
-  userController,
-  userAdminController,
-  categoryAdminController,
-  orderAdminController,
-  productAdminController,
-  categoryController,
-} = require('../config/di');
-const adminRoutes = require('./admin/admin.routes');
-const authRoutes = require('./auth.routes');
-const userRoutes = require('./users.routes');
-const categoryRoutes = require('./category.routes');
 
+const adminRoutes = require('./admin/admin.routes');
+const authRoutes = require('./user/auth.routes');
+const userRoutes = require('./user/users.routes');
+const categoryRoutes = require('./user/category.routes');
+const orderRoutes = require('./user/order.routes');
+const productRoutes = require('./user/product.routes');
 
 // auth
-const authRouter = authRoutes(authController);
-router.use('/auth', authRouter);
+router.use('/auth', authRoutes);
 
 //users
-const userRouter = userRoutes(userController);
-router.use('/users', userRouter);
+router.use('/users', userRoutes);
 
 // category
-const categoryRouter = categoryRoutes(categoryController);
-router.use('/category', categoryRouter);
+router.use('/categories', categoryRoutes);
+
+// order
+//router.use('/orders', orderRoutes);
+
+//product
+router.use('/products', productRoutes);
 
 // admin
-const adminRouter = adminRoutes(
-  userAdminController,
-  categoryAdminController,
-  orderAdminController,
-  productAdminController
-);
-router.use('/admin', adminRouter);
+router.use('/admin', adminRoutes);
 
 module.exports = router;

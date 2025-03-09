@@ -8,28 +8,59 @@ class ProductRepository {
     }
   }
 
-  async getProducts(page = 1, limit = 10,selectedFields = '') {
+  async getProducts(filters = {}, options = {}) {
     try {
-      const products = await Product.find().select(selectedFields)
+      const { page = 1, limit = 10, excludeFields = '' } = options;
+
+      // Build MongoDB query from filters
+      const query = {};
+
+      // Text search
+      if (filters.searchText) {
+        // Use MongoDB text search if you have text index set up
+        // query.$text = { $search: filters.searchText };
+        // Or use regex for simple case-insensitive search:
+        query.name = { $regex: filters.searchText, $options: 'i' };
+      }
+
+      // Category filter
+      if (filters.category) {
+        query.category = filters.category;
+      }
+
+      // New arrivals filter
+      if (filters.isNewArrival) {
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - 14);
+        query.dateAdded = { $gte: cutoffDate };
+      }
+
+      // Popular filter
+      if (filters.isPopular) {
+        query.rating = { $gte: 4.5 };
+      }
+
+      // Execute query
+      const products = await Product.find(query)
+        .select(excludeFields)
         .skip((page - 1) * limit)
         .limit(limit)
         .lean();
-      return products;
+
+      // Count total matching documents
+      const count = await Product.countDocuments(query);
+
+      return { products, count };
     } catch (error) {
-      console.error(error);
-      throw new Error(error);
+      console.error('Repository error:', error);
+      throw new Error(`Database error: ${error.message}`);
     }
   }
 
-  async getProductsCount() {
-    try {
-      const count = await Product.countDocuments();
-      return count;
-    } catch (error) {
-      console.error(error);
-      throw new Error(error);
-    }
+  async getCountProducts() {
+    return await Product.countDocuments();
   }
+
   async getProductById(id) {
     try {
       this.#validateId(id);

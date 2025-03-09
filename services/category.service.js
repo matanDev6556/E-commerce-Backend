@@ -5,8 +5,15 @@ class CategoryService {
     this.categoryRepository = categoryRepository;
   }
 
-  async getCategories(){
+  async getCategories() {
     return await this.categoryRepository.getCategories();
+  }
+
+  async getCategory(id) {
+    const category = await this.categoryRepository.findById(id);
+    if (!category)
+      throw new Error('Category not found!', { cause: { status: 404 } });
+    return category;
   }
 
   async addCategory(categoryData, files, req) {
