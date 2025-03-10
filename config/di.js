@@ -13,6 +13,7 @@ const OrderService = require('../services/order.service');
 const ProductService = require('../services/product.service');
 const ReviewService = require('../services/review.service');
 const WishlistService = require('../services/wishlist.service');
+const CartService = require('../services/cart.service');
 
 
 
@@ -27,8 +28,7 @@ const CategoryAdminController = require('../controllers/admin/category.admin.con
 const OrderAdminController = require('../controllers/admin/order.admin.controller');
 const ProductAdminController = require('../controllers/admin/product.admin.controller');
 const CartController = require('../controllers/user/cart.controller');
-
-
+const CartProductRepository = require('../repositories/cart_product.repository');
 
 
 
@@ -39,6 +39,7 @@ const categoryRepository = new CategoryRepository();
 const orderRepository = new OrderRepossitory();
 const productRepository = new ProductRepository();
 const reviewRepository = new ReviewRepository();
+const cartProductRepository = new CartProductRepository();
 
 
 // services
@@ -49,6 +50,7 @@ const userService = new UserService(userRepository, tokenRepository,orderReposit
 const productService = new ProductService(productRepository,categoryRepository,reviewRepository);
 const reviewService = new ReviewService(reviewRepository,productRepository,userRepository);
 const wishlistService = new WishlistService(userRepository,productRepository);
+const cartService = new CartService(cartProductRepository,userRepository,productRepository);
 
 // controllers
 const authController = new AuthController(authService);
@@ -57,7 +59,7 @@ const wishListController = new WishListController(wishlistService);
 const categoryController = new CategoryController(categoryService);
 const productController = new ProductController(productService);
 const reviewController = new ReviewController(reviewService);
-const cartController = new CartController(); 
+const cartController = new CartController(cartService); 
 
 //controllers - admin
 const userAdminController = new UserAdminController(userService);

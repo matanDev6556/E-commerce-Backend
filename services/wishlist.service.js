@@ -54,7 +54,6 @@ class WishlistService {
     const productAlreadyExists = user.wishlist.some(
       (item) => item.productId.toString() === productId.toString()
     );
-    console.log(productAlreadyExists);
     if (productAlreadyExists)
       throw new Error('Product already in wishlist', {
         cause: { status: 409 },

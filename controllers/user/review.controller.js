@@ -1,3 +1,5 @@
+const ErrorHandler = require('../../helpers/handle_controllers_error');
+
 class ReviewController {
   constructor(reviewService) {
     this.reviewService = reviewService;
@@ -13,7 +15,7 @@ class ReviewController {
       );
       return res.status(201).json(result);
     } catch (error) {
-      return this.handleError(error, res, 'Failed to leave review');
+      return ErrorHandler.handleError(error, res, 'Failed to leave review');
     }
   };
 
@@ -23,22 +25,11 @@ class ReviewController {
         const reviews = await this.reviewService.getProductReviews(productId);
         return res.json(reviews);
     } catch (error) {
-        return this.handleError(error, res, 'Failed to get reviews of product');
+        return ErrorHandler.handleError(error, res, 'Failed to get reviews of product');
     }
   };
 
-  handleError(error, res, msg) {
-    console.error('Error in review controller:', error);
-    const status = error.cause?.status || 500;
-    const message = msg;
-    const errorDetails = error.message;
 
-    return res.status(status).json({
-      success: false,
-      message,
-      errorDetails,
-    });
-  }
 }
 
 module.exports = ReviewController;

@@ -1,3 +1,5 @@
+const ErrorHandler = require('../../helpers/handle_controllers_error');
+
 class ProductController {
   constructor(productService) {
     this.productService = productService;
@@ -32,7 +34,7 @@ class ProductController {
     } catch (error) {
       // Error handling logic
       const status = error.cause?.status || 500;
-      this.handleError(error, res, `Error in getProducts: ${error.message}`);
+      ErrorHandler.handleError(error, res, `Error in getProducts: ${error.message}`);
     }
   };
 
@@ -41,7 +43,7 @@ class ProductController {
       const product = await this.productService.getProductById(req.params.id);
       return res.json(product);
     } catch (error) {
-      this.handleError(error, res, `Error in getProductById: ${error.message}`);
+      ErrorHandler.handleError(error, res, `Error in getProductById: ${error.message}`);
     }
   };
 
@@ -50,24 +52,13 @@ class ProductController {
       const products = await this.productService.getProducts();
       return res.json(products);
     } catch (error) {
-      this.handleError(error, res, `Error in searchProducts: ${error.message}`);
+      ErrorHandler.handleError(error, res, `Error in searchProducts: ${error.message}`);
     }
   };
 
  
 
-  handleError(error, res,msg) {
-    console.error('Error in controller:', error);
-    const status = error.cause?.status || 500;
-    const message = msg;
-    const errorDetails = error.message;
-    
-    return res.status(status).json({
-      success: false,
-      message,
-      errorDetails,
-    });
-  }
+
 }
 
 module.exports = ProductController;
