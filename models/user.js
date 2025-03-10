@@ -29,7 +29,13 @@ const userSchema = Schema({
 
 userSchema.index({ email: 1 }, { unique: true });
 
-userSchema.set('toObject', { virtuals: true });
+userSchema.set('toObject', {
+  virtuals: true,
+  transform: (doc, ret) => {
+    delete ret.__v; 
+    return ret;
+  },
+});
 userSchema.set('toJSON', { virtuals: true });
 
 exports.User = model('User', userSchema);

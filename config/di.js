@@ -12,17 +12,23 @@ const CategoryService = require('../services/category.service');
 const OrderService = require('../services/order.service');
 const ProductService = require('../services/product.service');
 const ReviewService = require('../services/review.service');
+const WishlistService = require('../services/wishlist.service');
+
 
 
 const AuthController = require('../controllers/user/auth.controller');
 const UserController = require('../controllers/user/user.controller');
+const WishListController = require('../controllers/user/wishList.controller');
+const CategoryController = require('../controllers/user/category.controller');
+const ProductController = require('../controllers/user/product.controller');
+const ReviewController = require('../controllers/user/review.controller');
 const UserAdminController = require('../controllers/admin/user.admin.controller');
 const CategoryAdminController = require('../controllers/admin/category.admin.controller');
 const OrderAdminController = require('../controllers/admin/order.admin.controller');
 const ProductAdminController = require('../controllers/admin/product.admin.controller');
-const CategoryController = require('../controllers/user/category.controller');
-const ProductController = require('../controllers/user/product.controller');
-const ReviewController = require('../controllers/user/review.controller');
+const CartController = require('../controllers/user/cart.controller');
+
+
 
 
 
@@ -42,13 +48,17 @@ const authService = new AuthService(userRepository, tokenRepository);
 const userService = new UserService(userRepository, tokenRepository,orderRepository);
 const productService = new ProductService(productRepository,categoryRepository,reviewRepository);
 const reviewService = new ReviewService(reviewRepository,productRepository,userRepository);
+const wishlistService = new WishlistService(userRepository,productRepository);
 
 // controllers
 const authController = new AuthController(authService);
 const userController = new UserController(userService);
+const wishListController = new WishListController(wishlistService);
 const categoryController = new CategoryController(categoryService);
 const productController = new ProductController(productService);
 const reviewController = new ReviewController(reviewService);
+const cartController = new CartController(); 
+
 //controllers - admin
 const userAdminController = new UserAdminController(userService);
 const categoryAdminController = new CategoryAdminController(categoryService);
@@ -58,6 +68,8 @@ const productAdminController = new ProductAdminController(productService);
 const dependencies = {
   authController,
   userController,
+  wishListController,
+  cartController,
   categoryController,
   productController,
   reviewController,

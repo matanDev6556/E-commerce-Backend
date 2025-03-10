@@ -28,7 +28,7 @@ class ReviewController {
   };
 
   handleError(error, res, msg) {
-    console.error('Error in controller:', error);
+    console.error('Error in review controller:', error);
     const status = error.cause?.status || 500;
     const message = msg;
     const errorDetails = error.message;
