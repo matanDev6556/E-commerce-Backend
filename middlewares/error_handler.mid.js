@@ -1,5 +1,5 @@
 // src/middlewares/error_handler.js
-const TokenService = require('../services/token.service');
+const TokenService = require('../modules/auth/token.service');
 
 async function errorHandler(error, req, res, next) {
   console.log('ERROR OCCURRED:', error.name, error.message);

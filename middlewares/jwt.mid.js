@@ -1,5 +1,5 @@
 const { expressjwt: expjwt } = require('express-jwt');
-const { Token } = require('../models/token');
+const { Token } = require('../modules/auth/token');
 
 function authJwt() {
   const API = process.env.API_URL;
