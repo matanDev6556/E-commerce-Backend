@@ -5,15 +5,16 @@ const category = require('../modules/category/di.category');
 const order = require('../modules/order/di.order');
 const product = require('../modules/product/di.product');
 const review = require('../modules/review/di.review');
-const wishlist = require('../modules/wishlist/di.wishlist');
-const cart = require('../modules/cart/di.cart');
+const wishlist = require('../modules/users/wishlist/di.wishlist');
+const cart = require('../modules/users/cart/di.cart');
 const admin = require('../modules/admin/di.admin');
 const checkout = require('../modules/checkout/di.checkout');
 
 // Create services with required dependencies
 const userService = users.createUserService(
   auth.tokenRepository,
-  order.orderRepository
+  order.orderRepository,
+  checkout.stripeRepository,
 );
 
 const authService = auth.createAuthService(users.userRepository);

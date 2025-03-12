@@ -1,14 +1,9 @@
 class UserService {
-  constructor(
-    userRepository,
-    tokenRepository,
-    orderRepository,
-   
-  ) {
+  constructor(userRepository, tokenRepository, orderRepository,paymentRepository) {
     this.userRepository = userRepository;
     this.tokenRepository = tokenRepository;
     this.orderRepository = orderRepository;
-    
+    this.paymentRepository = paymentRepository;
   }
   async getUsers() {
     const users = await this.userRepository.getUsers();
@@ -20,6 +15,17 @@ class UserService {
     const user = await this.userRepository.findById(userId, selectedFields);
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
     return user;
+  }
+
+  async getPaymentProfile(userId) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new Error('User not found', { cause: { status: 404 } });
+    else if (!user.paymentCustomerId) {
+      throw new Error('User has no payment profile', { cause: { status: 404 } });
+    }
+
+    const session = await this.paymentRepository.getPaymentProfile(user.paymentCustomerId); 
+    return { url: session.url };
   }
 
   async updateUser(id, userData) {
@@ -37,7 +43,7 @@ class UserService {
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
 
     // find the orders of user
-    const orders = await orderRepository.findOrdersByUser(userId);
+    const orders = await this.orderRepository.findOrdersByUser(userId);
 
     // delete all the order items of spetsific order
     for (const order of orders) {
@@ -54,9 +60,11 @@ class UserService {
     console.log(`🗑 Deleting orders for user ${userId}`);
     await this.orderRepository.deleteOrdersByUser(userId);
 
-    //TODO:
-    //console.log(`🗑 Deleting cart products for user ${userId}`);
-    //await this.cartRepository.deleteCartByUser(userId);
+    console.log(`🗑 Deleting cart products for user ${userId}`);
+    for (const cartId of user.cart) {
+      console.log(`🗑 Deleting cart product ${cartId} for user ${userId}`);
+      await this.cartRepository.removeCartProduct(cartId);
+    }
 
     console.log(`🗑 Deleting user token for user ${userId}`);
     await this.tokenRepository.deleteByUserId(userId);
@@ -66,9 +74,6 @@ class UserService {
 
     return { message: 'User deleted successfully' };
   }
-
- 
-
 }
 
 module.exports = UserService;

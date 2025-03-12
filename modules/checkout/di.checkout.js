@@ -15,6 +15,7 @@ const createCheckoutController = (checkoutService, jwtService) => {
 };
 
 module.exports = {
+  stripeRepository,
   createCheckoutService,
   createCheckoutController,
 };

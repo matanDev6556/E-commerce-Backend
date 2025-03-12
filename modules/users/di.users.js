@@ -4,8 +4,17 @@ const UserController = require('./user.controller');
 
 const userRepository = new UserRepository();
 
-const createUserService = (tokenRepository, orderRepository) => {
-  return new UserService(userRepository, tokenRepository, orderRepository);
+const createUserService = (
+  tokenRepository,
+  orderRepository,
+  paymentRepository
+) => {
+  return new UserService(
+    userRepository,
+    tokenRepository,
+    orderRepository,
+    paymentRepository
+  );
 };
 
 const createUserController = (userService) => {
@@ -15,5 +24,5 @@ const createUserController = (userService) => {
 module.exports = {
   userRepository,
   createUserService,
-  createUserController
+  createUserController,
 };

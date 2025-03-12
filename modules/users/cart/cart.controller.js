@@ -1,4 +1,4 @@
-const ErrorHandler = require('../../helpers/handle_controllers_error');
+const ErrorHandler = require('../../../helpers/handle_controllers_error');
 
 class CartController {
   constructor(cartService) {

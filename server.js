@@ -2,9 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const routes = require('./routes.main');
-const authJwt = require('./middlewares/jwt.mid');
+//const authJwt = require('./middlewares/jwt.mid');
 const errorHandler = require('./middlewares/error_handler.mid');
-const authorizePostRequests = require('./middlewares/authorizePostRequests.mid');
+//const authorizePostRequests = require('./middlewares/authorizePostRequests.mid');
 
 module.exports = () => {
   const app = express();

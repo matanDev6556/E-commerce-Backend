@@ -9,6 +9,7 @@ const {
 router.get('/', userController.getUsers);
 router.get('/:id', userController.getUserById);
 router.put('/:id', userController.updateUser);
+router.get('/:id/paymentProfile',userController.getPaymentProfile);
 
 // wishList
 router.get('/:id/wishlist', wishListController.getUserWishList);

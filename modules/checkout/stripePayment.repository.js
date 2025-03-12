@@ -10,6 +10,21 @@ class StripePaymentRepository extends PaymentInterface {
     });
   }
 
+  async getPaymentProfile(customerId) {
+    try {
+      const session = await this.stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: 'http://localhost:3000/payment-success', 
+      });
+      return { url: session.url };
+    } catch (error) {
+      console.error('Error creating billing portal session:', error.message);
+      throw new Error('Failed to create billing portal session', {
+        cause: { status: 500 },
+      });
+    }
+  }
+
   async createCustomer(userData) {
     try {
       const customer = await this.stripe.customers.create({

@@ -49,13 +49,7 @@ class CartProductRepository {
     }
   }
 
-  async clearUserCart(userId) {
-    try {
-      return await CartProduct.deleteMany({ user: userId });
-    } catch (error) {
-      throw new Error('Failed to clear user cart', { cause: error });
-    }
-  }
+  
 }
 
 module.exports = CartProductRepository;

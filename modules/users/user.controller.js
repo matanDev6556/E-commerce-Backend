@@ -26,6 +26,16 @@ class UserController {
     }
   };
 
+  getPaymentProfile = async (req,res) => {
+    try {
+      const userId = req.params.id;
+      const result = await this.userService.getPaymentProfile(userId);
+      return res.json(result);
+    } catch (error) {
+      return ErrorHandler.handleError(error,res,'Failed to get payment profile of user');
+    }
+  }
+
   updateUser = async (req, res) => {
     try {
       const id = req.params.id;
