@@ -1,61 +1,86 @@
-const UserRepository = require('../repositories/user.repository');
-const TokenRepository = require('../repositories/token.repository');
-const CategoryRepository = require('../repositories/category.repository');
-const OrderRepossitory = require('../repositories/order.repository');
-const ProductRepository = require('../repositories/product.repository');
-const ReviewRepository = require('../repositories/review.repsitory');
+// dependencies.js
+const users = require('../modules/users/di.users');
+const auth = require('../modules/auth/di.auth');
+const category = require('../modules/category/di.category');
+const order = require('../modules/order/di.order');
+const product = require('../modules/product/di.product');
+const review = require('../modules/review/di.review');
+const wishlist = require('../modules/users/wishlist/di.wishlist');
+const cart = require('../modules/users/cart/di.cart');
+const admin = require('../modules/admin/di.admin');
+const checkout = require('../modules/checkout/di.checkout');
 
+// Create services with required dependencies
+const userService = users.createUserService(
+  auth.tokenRepository,
+  order.orderRepository,
+  checkout.stripeRepository,
+);
 
-const AuthService = require('../services/auth.service');
-const UserService = require('../services/user.service');
-const TokenService = require('../services/token.service');
-const CategoryService = require('../services/category.service');
-const OrderService = require('../services/order.service');
-const ProductService = require('../services/product.service');
+const authService = auth.createAuthService(users.userRepository);
 
+const productService = product.createProductService(
+  category.categoryRepository,
+  review.reviewRepository
+);
 
-const AuthController = require('../controllers/auth.controller');
-const UserController = require('../controllers/user.controller');
-const UserAdminController = require('../controllers/admin/user.admin.controller');
-const CategoryAdminController = require('../controllers/admin/category.admin.controller');
-const OrderAdminController = require('../controllers/admin/order.admin.controller');
-const ProductAdminController = require('../controllers/admin/product.admin.controller');
+const reviewService = review.createReviewService(
+  product.productRepository,
+  users.userRepository
+);
 
+const wishlistService = wishlist.createWishlistService(
+  users.userRepository,
+  product.productRepository
+);
 
+const cartService = cart.createCartService(
+  users.userRepository,
+  product.productRepository
+);
 
-// repos
-const userRepository = new UserRepository();
-const tokenRepository = new TokenRepository();
-const categoryRepository = new CategoryRepository();
-const orderRepository = new OrderRepossitory();
-const productRepository = new ProductRepository();
-const reviewRepository = new ReviewRepository();
+const checkoutService = checkout.createCheckoutService(
+  users.userRepository,
+  product.productRepository,
+  order.orderRepository
+);
 
+// Create controllers
+const authController = auth.createAuthController(authService);
+const userController = users.createUserController(userService);
+const productController = product.createProductController(productService);
+const reviewController = review.createReviewController(reviewService);
+const wishListController = wishlist.createWishListController(wishlistService);
+const cartController = cart.createCartController(cartService);
+const checkoutController = checkout.createCheckoutController(
+  checkoutService,
+  auth.jwtService
+);
 
-// services
-const categoryService = new CategoryService(categoryRepository);
-const orderService = new OrderService(orderRepository);
-const authService = new AuthService(userRepository, tokenRepository);
-const userService = new UserService(userRepository, tokenRepository,orderRepository);
-const productService = new ProductService(productRepository,categoryRepository,reviewRepository);
+// Create admin controllers
+const adminControllers = admin.createAdminControllers(
+  userService,
+  category.categoryService,
+  order.orderService,
+  productService
+);
 
-
-// controllers
-const authController = new AuthController(authService);
-const userController = new UserController(userService);
-//controllers - admin
-const userAdminController = new UserAdminController(userService);
-const categoryAdminController = new CategoryAdminController(categoryService);
-const orderAdminController = new OrderAdminController(orderService);
-const productAdminController = new ProductAdminController(productService);
-
+// Export all required dependencies
 const dependencies = {
+  //  Controllers
   authController,
   userController,
-  userAdminController,
-  categoryAdminController,
-  orderAdminController,
-  productAdminController
+  wishListController,
+  cartController,
+  categoryController: category.categoryController,
+  productController,
+  reviewController,
+  checkoutController,
+  // Admin Controllers
+  userAdminController: adminControllers.userAdminController,
+  categoryAdminController: adminControllers.categoryAdminController,
+  orderAdminController: adminControllers.orderAdminController,
+  productAdminController: adminControllers.productAdminController,
 };
 
 module.exports = dependencies;

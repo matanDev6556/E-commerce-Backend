@@ -1,5 +1,7 @@
 // src/middlewares/error_handler.js
-const TokenService = require('../services/token.service');
+const { tokenService } = require('../modules/auth/di.auth');
+
+
 
 async function errorHandler(error, req, res, next) {
   console.log('ERROR OCCURRED:', error.name, error.message);
@@ -9,7 +11,7 @@ async function errorHandler(error, req, res, next) {
     error.message.includes('jwt expired')
   ) {
     try {
-      const newAccessToken = await TokenService.renewAccessToken(
+      const newAccessToken = await tokenService.renewAccessToken(
         req.header('Authorization')?.split(' ')[1]
       );
       return res.status(200).json({
@@ -28,11 +30,13 @@ async function errorHandler(error, req, res, next) {
   }
 
   // other erros
-  return res.status(error.status || 500).json({
+  res.status(error.status || 500).json({
     success: false,
     type: error.name || 'ServerError',
     message: error.message || 'An unexpected error occurred',
   });
+
+  next(error);
 }
 
 module.exports = errorHandler;
