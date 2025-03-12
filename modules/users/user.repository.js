@@ -2,9 +2,7 @@ const { User } = require('./user');
 
 class UserRepository {
   async findByEmail(email) {
-    return await User.findOne({ email }).select(
-      'name email phone passwordHash '
-    );
+    return await User.findOne({ email });
   }
   async create(userData) {
     try {
@@ -31,7 +29,7 @@ class UserRepository {
     try {
       return await User.findByIdAndUpdate(userId, updateData, {
         new: true,
-      }).select('name email phone');
+      });
     } catch (error) {
       throw new Error(`Failed to update user: ${error.message}`, {
         cause: error,

@@ -1,20 +1,21 @@
 const { validationResult } = require('express-validator');
+const ErrorHandler = require('../../helpers/handle_controllers_error');
 
 class AuthController {
   constructor(authService) {
     this.authService = authService;
   }
 
-  register = async (req, res, next) => {
+  register = async (req, res) => {
     try {
       const user = await this.authService.register(req.body);
       res.status(201).json({ success: true, data: user });
     } catch (error) {
-      next(error);
+      return ErrorHandler.handleError(error, res, 'Failed to register');
     }
   };
 
-  login = async (req, res, next) => {
+  login = async (req, res) => {
     try {
       const { email, password } = req.body;
       console.log(`email - ${email} , pass -  ${password}`);
@@ -24,7 +25,7 @@ class AuthController {
       );
       res.json({ success: true, data: { ...user._doc, accessToken } });
     } catch (error) {
-      next(error);
+      return ErrorHandler.handleError(error, res, 'Failed to login ');
     }
   };
 

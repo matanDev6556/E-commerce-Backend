@@ -5,8 +5,9 @@ const adminRoutes = require('./modules/admin/routes/admin.routes');
 const authRoutes = require('./modules/auth/auth.routes');
 const userRoutes = require('./modules/users/users.routes');
 const categoryRoutes = require('./modules/category/category.routes');
-const orderRoutes = require('./modules/order/order.routes');
+//const orderRoutes = require('./modules/order/order.routes');
 const productRoutes = require('./modules/product/product.routes');
+const checkoutRoutes = require('./modules/checkout/checkout.routes');
 
 // auth
 router.use('/auth', authRoutes);
@@ -23,7 +24,10 @@ router.use('/categories', categoryRoutes);
 //product
 router.use('/products', productRoutes);
 
-// admin
+// checkout
+router.use('/checkout', checkoutRoutes);
+
+
 router.use('/admin', adminRoutes);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-class Authentication {
+class Authorization {
   constructor() {
     this.secret = process.env.JWT_SECRET; 
   }
@@ -22,9 +22,8 @@ class Authentication {
   }
 
   isValidId(id) {
-
     return typeof id === 'string' && id.length === 24; 
   }
 }
 
-module.exports = new Authentication();
+module.exports = new Authorization();

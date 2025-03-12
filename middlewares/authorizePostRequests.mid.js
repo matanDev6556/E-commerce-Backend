@@ -1,5 +1,5 @@
 const { publicEndpoints } = require('../config/auth.config');
-const authService = require('../modules/auth/authentication.service');
+const authService = require('../modules/auth/authirization.service');
 
 async function authorizePostRequests(req, res, next) {
   if (req.method !== 'POST') return next();

@@ -1,5 +1,5 @@
 const { expressjwt: expjwt } = require('express-jwt');
-const { Token } = require('../modules/auth/token');
+const { tokenService } = require('../modules/auth/di.auth');
 
 function authJwt() {
   const API = process.env.API_URL;
@@ -23,27 +23,35 @@ function authJwt() {
 
       `${API}/auth/reset-password`,
       `${API}/auth/reset-password/`,
+
+      `${API}/checkout/webhook`,
+      `${API}/checkout/webhook/`,
+
+    
     ],
   });
 }
 
 async function isRevoked(req, jwt) {
   const authHeader = req.header('Authorization');
-  console.log('authHeader', authHeader);
+
   if (!authHeader) {
     return false;
   }
 
   if (!authHeader.startsWith('Bearer')) {
+    console.log('Invalid Auth Header format!');
     return true;
   }
 
   const accessToken = authHeader.replace('Bearer', '').trim();
-  const token = await Token.findOne({ accessToken });
+
+  const token = await tokenService.findToken(accessToken);
 
   const adminRouteRegex = /^\/api\/admin\//i;
-  const adminFault =
-    !jwt.payload.isAdmin && adminRouteRegex.test(req.originalUrl);
+  const isAdminRoute = adminRouteRegex.test(req.originalUrl);
+
+  const adminFault = !jwt.payload.isAdmin && isAdminRoute;
 
   return adminFault || !token;
 }

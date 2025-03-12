@@ -3,6 +3,7 @@
     "node_modules": true,
     "README.md": true,
     "package-lock.json": true,
+    "eslint.config.mjs": true,
     "package.json": true
   }
 }

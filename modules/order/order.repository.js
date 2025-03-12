@@ -14,6 +14,11 @@ class OrderRepossitory {
     return await query.exec();
   }
 
+  async createOrder(orderData) {
+    const order = new Order(orderData);
+    return await order.save();
+  }
+
   async getOrderById(id) {
     return await Order.findById(id);
   }
@@ -32,6 +37,13 @@ class OrderRepossitory {
       { $set: updateData },
       { new: true, runValidators: true }
     );
+  }
+
+  
+
+  async createOrderItem(orderItemData) {
+    const orderItem = new OrderItem(orderItemData);
+    return await orderItem.save();
   }
 
   async deleteOrder(orderId) {

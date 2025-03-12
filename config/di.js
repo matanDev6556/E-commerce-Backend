@@ -1,13 +1,14 @@
 // dependencies.js
-const users = require('../../modules/users/di.users');
-const auth = require('../../modules/auth/di.auth');
-const category = require('../../modules/category/di.category');
-const order = require('../../modules/order/di.order');
-const product = require('../../modules/product/di.product');
-const review = require('../../modules/review/di.review');
-const wishlist = require('../../modules/wishlist/di.wishlist');
-const cart = require('../../modules/cart/di.cart');
-const admin = require('../../modules/admin/di.admin');
+const users = require('../modules/users/di.users');
+const auth = require('../modules/auth/di.auth');
+const category = require('../modules/category/di.category');
+const order = require('../modules/order/di.order');
+const product = require('../modules/product/di.product');
+const review = require('../modules/review/di.review');
+const wishlist = require('../modules/wishlist/di.wishlist');
+const cart = require('../modules/cart/di.cart');
+const admin = require('../modules/admin/di.admin');
+const checkout = require('../modules/checkout/di.checkout');
 
 // Create services with required dependencies
 const userService = users.createUserService(
@@ -19,7 +20,8 @@ const authService = auth.createAuthService(users.userRepository);
 
 const productService = product.createProductService(
   category.categoryRepository,
-  review.reviewRepository
+  review.reviewRepository,
+ 
 );
 
 const reviewService = review.createReviewService(
@@ -37,6 +39,12 @@ const cartService = cart.createCartService(
   product.productRepository
 );
 
+const checkoutService = checkout.createCheckoutService(
+  users.userRepository,
+  product.productRepository,
+  order.orderRepository,
+);
+
 // Create controllers
 const authController = auth.createAuthController(authService);
 const userController = users.createUserController(userService);
@@ -44,6 +52,10 @@ const productController = product.createProductController(productService);
 const reviewController = review.createReviewController(reviewService);
 const wishListController = wishlist.createWishListController(wishlistService);
 const cartController = cart.createCartController(cartService);
+const checkoutController = checkout.createCheckoutController(
+  checkoutService,
+  auth.jwtService
+);
 
 // Create admin controllers
 const adminControllers = admin.createAdminControllers(
@@ -52,8 +64,8 @@ const adminControllers = admin.createAdminControllers(
   order.orderService,
   productService
 );
-// Export all required dependencies
 
+// Export all required dependencies
 const dependencies = {
   //  Controllers
   authController,
@@ -63,7 +75,7 @@ const dependencies = {
   categoryController: category.categoryController,
   productController,
   reviewController,
-
+  checkoutController,
   // Admin Controllers
   userAdminController: adminControllers.userAdminController,
   categoryAdminController: adminControllers.categoryAdminController,

@@ -1,8 +1,5 @@
 const mongoose = require('mongoose');
-const { Category } = require('../modules/category/category');
-const { Product } = require('../modules/product/product');
-const { OrderItem } = require('../modules/order/order_item');
-const { Order } = require('../modules/order/order');
+require('dotenv').config();
 
 module.exports = async () => {
   try {

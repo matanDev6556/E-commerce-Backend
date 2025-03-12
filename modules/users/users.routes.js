@@ -1,10 +1,10 @@
 const express = require('express');
+const router = express.Router();
 const {
   userController,
   wishListController,
   cartController,
-} = require('../../config/di/di');
-const router = express.Router();
+} = require('../../config/di');
 
 router.get('/', userController.getUsers);
 router.get('/:id', userController.getUserById);

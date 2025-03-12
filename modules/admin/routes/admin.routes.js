@@ -9,7 +9,7 @@ const {
   categoryAdminController,
   orderAdminController,
   productAdminController,
-} = require('../../../config/di/di'); 
+} = require('../../../config/di');
 
 // Users
 router.use('/users', userAdminRoutes(userAdminController));

@@ -1,10 +1,12 @@
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
+const { sendMail } = require('../../helpers/email_sender');
+
 
 class AuthService {
-  constructor(userRepository, tokenRepository) {
+  constructor(userRepository, tokenRepository,jwtService) {
     this.userRepository = userRepository;
     this.tokenRepository = tokenRepository;
+    this.jwtService = jwtService;
   }
 
   async register(userData) {
@@ -25,25 +27,18 @@ class AuthService {
 
   async login(email, password) {
     const user = await this.userRepository.findByEmail(email);
+ 
     if (!user) {
       throw new Error('User not found', { cause: { status: 404 } });
     }
-    console.log('Auth service - login : - user - ', user);
+
     if (!(await bcrypt.compare(password, user.passwordHash))) {
       throw new Error('Incorrect password!', { cause: { status: 400 } });
     }
 
-    const accessToken = jwt.sign(
-      { id: user.id, isAdmin: user.isAdmin },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: '24h' }
-    );
-
-    const refreshToken = jwt.sign(
-      { id: user.id, isAdmin: user.isAdmin },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: '60d' }
-    );
+    const payload = { id: user.id, isAdmin: user.isAdmin };
+    const accessToken = this.jwtService.signAccessToken(payload);
+    const refreshToken = this.jwtService.signRefreshToken(payload);
 
     await this.tokenRepository.deleteByUserId(user.id);
     await this.tokenRepository.create({
@@ -51,7 +46,7 @@ class AuthService {
       accessToken,
       refreshToken,
     });
-
+    
     return { user, accessToken };
   }
 
@@ -59,16 +54,11 @@ class AuthService {
     const token = await this.tokenRepository.findByAccessToken(accessToken);
     if (!token) throw new Error('Invalid token', { cause: { status: 401 } });
 
-    const tokenData = jwt.decode(token.refreshToken);
+    const tokenData = this.jwtService.decodeToken(token.refreshToken);
     const user = await this.userRepository.findById(tokenData.id);
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
 
-    const isValid = jwt.verify(
-      token.refreshToken,
-      process.env.REFRESH_TOKEN_SECRET
-    );
-    if (!isValid) throw new Error('Invalid token', { cause: { status: 401 } });
-
+    this.jwtService.verifyToken(token.refreshToken, true); // אימות Refresh Token
     return true;
   }
 
@@ -84,7 +74,7 @@ class AuthService {
     user.resetPasswordOtpExpires = Date.now() + 600000; // 10 דקות
     await user.save();
 
-    await mailSender.sendMail(
+    await sendMail(
       email,
       'Password Reset OTP',
       `Your OTP for password reset is: ${otp}`
