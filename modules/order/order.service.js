@@ -1,5 +1,5 @@
 class OrderService {
-  constructor(orderRepository, orderItemRepository) {
+  constructor(orderRepository) {
     this.orderRepository = orderRepository;
   }
 
@@ -11,6 +11,32 @@ class OrderService {
     const count = await this.orderRepository.getOrdersCount();
 
     return count;
+  }
+  async getUserOrders(userId) {
+    const orders = await this.orderRepository.findOrdersByUser(userId);
+    if (!orders) {
+      throw new Error('Product not found', { cause: { status: 404 } });
+    }
+
+    const orderStatus = {
+      completed: orders.filter((order) => order.status === 'delivered'),
+      active: orders.filter(
+        (order) => !['cancelled', 'expired', 'delivered'].includes(order.status)
+      ),
+      cancelled: orders.filter((order) =>
+        ['cancelled', 'expired'].includes(order.status)
+      ),
+    };
+
+    return { total: orders.length, ...orderStatus };
+  }
+
+  async getOrderById(orderId) {
+    const order = await this.orderRepository.getOrderById(orderId);
+    if (!order) {
+      throw new Error('Order not found', { cause: { status: 404 } });
+    }
+    return order;
   }
 
   async changeOrderStatus(orderId, newStatus) {
@@ -24,16 +50,12 @@ class OrderService {
       order.statusHistory.push(order.status);
     }
 
-    try {
-      const updatedOrder = await this.orderRepository.updateOrder(orderId, {
-        status: newStatus,
-        statusHistory: order.statusHistory,
-      });
+    const updatedOrder = await this.orderRepository.updateOrder(orderId, {
+      status: newStatus,
+      statusHistory: order.statusHistory,
+    });
 
-      return updatedOrder;
-    } catch (error) {
-      throw error;
-    }
+    return updatedOrder;
   }
 
   async deleteOrder(orderId) {
@@ -45,6 +67,10 @@ class OrderService {
     for (const orderItemId of order.orderItems) {
       await this.orderRepository.deleteItemOrders(orderItemId);
     }
+  }
+
+  async findOrdersByUser(userId) {
+    return await this.orderRepository.findOrdersByUser(userId);
   }
 }
 

@@ -13,8 +13,8 @@ module.exports = () => {
   app.use(cors());
   app.use(morgan('tiny'));
   app.options('*', cors());
-  app.use(authJwt()); // for evrey req check for authorization
-  app.use(authorizePostRequests);
+  //app.use(authJwt()); // for evrey req check for authorization
+  //app.use(authorizePostRequests);
   app.use(errorHandler); // if the auth failed handle the error
   app.use('/public', express.static(__dirname + '/public')); // for images client uploads
   app.use(`${process.env.API_URL}`, routes); // basic route for api

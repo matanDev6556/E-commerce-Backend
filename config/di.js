@@ -20,8 +20,7 @@ const authService = auth.createAuthService(users.userRepository);
 
 const productService = product.createProductService(
   category.categoryRepository,
-  review.reviewRepository,
- 
+  review.reviewRepository
 );
 
 const reviewService = review.createReviewService(
@@ -42,7 +41,7 @@ const cartService = cart.createCartService(
 const checkoutService = checkout.createCheckoutService(
   users.userRepository,
   product.productRepository,
-  order.orderRepository,
+  order.orderRepository
 );
 
 // Create controllers

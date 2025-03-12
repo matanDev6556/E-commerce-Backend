@@ -20,15 +20,17 @@ class OrderRepossitory {
   }
 
   async getOrderById(id) {
-    return await Order.findById(id);
+    return await Order.findById(id).populate('orderItems');
   }
 
   async getOrdersCount() {
     return await Order.countDocuments();
   }
-
-  async findOrdersByUser(userId) {
-    return await Order.find({ user: userId });
+  async findOrdersByUser(userId,) {
+    return await Order.find({ user: userId })
+      .select('orderItems status totalPrice dateOrdered')
+      .populate('orderItems')
+      .sort({ dateOrdered: -1 });
   }
 
   async updateOrder(orderId, updateData) {
@@ -38,8 +40,6 @@ class OrderRepossitory {
       { new: true, runValidators: true }
     );
   }
-
-  
 
   async createOrderItem(orderItemData) {
     const orderItem = new OrderItem(orderItemData);
