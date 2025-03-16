@@ -8,7 +8,10 @@ const errorHandler = require('./middlewares/error_handler.mid');
 
 module.exports = () => {
   const app = express();
-  app.use(`${process.env.API_URL}/checkout/webhook`, express.raw({ type: 'application/json' }));
+  app.use(
+    `${process.env.API_URL}/checkout/webhook`,
+    express.raw({ type: 'application/json' })
+  );
   app.use(express.json());
   app.use(cors());
   app.use(morgan('tiny'));
