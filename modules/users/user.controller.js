@@ -11,7 +11,7 @@ class UserController {
       const users = await this.userService.getUsers();
       res.json(users);
     } catch (error) {
-      return ErrorHandler.handleError(error,res,'Failed to fetch users');
+      return ErrorHandler.handleError(error,res,error.message);
       
     }
   };
@@ -21,7 +21,7 @@ class UserController {
       const user = await this.userService.getUserById(req.params.id);
       return res.json({ success: true, data: user });
     } catch (error) {
-      return ErrorHandler.handleError(error,res,'Failed to fetch user');
+      return ErrorHandler.handleError(error,res,error.message);
       
     }
   };

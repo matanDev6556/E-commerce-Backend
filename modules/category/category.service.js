@@ -16,7 +16,7 @@ class CategoryService {
     return category;
   }
 
-  async addCategory(categoryData, files, req) {
+  async addCategory(categoryData, files) {
     // Check if the image was uploaded
     const image = files['image']?.[0];
     if (!image) {
@@ -24,7 +24,7 @@ class CategoryService {
     }
 
     // Create URL for the image using req
-    const imageUrl = `${req.protocol}://${req.get('host')}/${image.path}`;
+    const imageUrl = `http://localhost:3000/uploads/${image.filename}`;
     const finalCategoryData = { ...categoryData, image: imageUrl };
 
     // Create a new category in the DB through the Repository

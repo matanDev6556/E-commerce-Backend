@@ -51,14 +51,15 @@ class AuthService {
   }
 
   async verifyToken(accessToken) {
+    console.log(accessToken)
     const token = await this.tokenRepository.findByAccessToken(accessToken);
     if (!token) throw new Error('Invalid token', { cause: { status: 401 } });
 
     const tokenData = this.jwtService.decodeToken(token.refreshToken);
     const user = await this.userRepository.findById(tokenData.id);
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
-
-    this.jwtService.verifyToken(token.refreshToken, true); // אימות Refresh Token
+    
+    this.jwtService.verifyToken(token.refreshToken, true); 
     return true;
   }
 

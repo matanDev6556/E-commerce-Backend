@@ -11,10 +11,10 @@ class CheckoutService {
     this.orderRepository = orderRepository;
   }
 
-  async checkout(userId, cartItems) {
+  async checkout(userId, cartItems, successUrl, cancelUrl) {
     const user = await this.userRepository.findById(userId);
     if (!user) throw new Error('User not found!', { cause: { status: 404 } });
-
+  
     const enrichedCartItems = [];
     for (const cartItem of cartItems) {
       const product = await this.productRepository.getProductById(
@@ -36,9 +36,9 @@ class CheckoutService {
         images: product.images || [],
       });
     }
-
+  
     let customerId = user.paymentCustomerId;
-
+  
     if (!customerId) {
       customerId = await this.paymentRepository.createCustomer({
         email: user.email,
@@ -50,10 +50,12 @@ class CheckoutService {
         paymentCustomerId: customerId,
       });
     }
-
+  
     const checkoutUrl = await this.paymentRepository.createCheckoutSession(
       customerId,
-      enrichedCartItems
+      enrichedCartItems,
+      successUrl,
+      cancelUrl
     );
     return { url: checkoutUrl };
   }
@@ -62,7 +64,7 @@ class CheckoutService {
     try {
       const event = this.paymentRepository.constructEvent(rawBody, signature);
 
-      // לפי הסוג של האירוע, נפעיל פונקציות מתאימות
+      console.log('webhook event :' ,event.type);
       switch (event.type) {
         case 'checkout.session.completed':
           await this.handleCheckoutCompleted(event.data.object);
@@ -110,7 +112,7 @@ class CheckoutService {
         const orderItem = {
           product: productId,
           productName: product.name,
-          productImage: product.images?.[0] || '',
+          productImage: product.image,
           productPrice: item.price.unit_amount / 100,
           quantity: item.quantity,
           selectedSize: item.price.product.metadata.selectedSize || '',

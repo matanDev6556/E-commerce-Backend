@@ -9,7 +9,7 @@ class WishListController {
     try {
       const userId = req.params.id;
       const wishlist = await this.wishlistService.getUserWishList(userId);
-      return res.json(wishlist);
+      return res.json({ data: wishlist });
     } catch (error) {
       return ErrorHandler.handleError(error, res, 'Failed to getUserWishList');
     }
@@ -19,8 +19,11 @@ class WishListController {
     try {
       const productId = req.body.productId;
       const userId = req.params.id;
-      await this.wishlistService.addToWishList(userId, productId);
-      return res.status(200).end();
+      const product = await this.wishlistService.addToWishList(
+        userId,
+        productId
+      );
+      return res.status(201).json({ data: product });
     } catch (error) {
       return ErrorHandler.handleError(error, res, 'Failed to addToWishList');
     }
@@ -30,15 +33,17 @@ class WishListController {
     try {
       const userId = req.params.id;
       const productId = req.params.productId;
-      
+
       await this.wishlistService.removeFromWishList(userId, productId);
       return res.status(204).end();
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'Failed to removeFromWishList');
+      return ErrorHandler.handleError(
+        error,
+        res,
+        'Failed to removeFromWishList'
+      );
     }
   };
-
-
 }
 
 module.exports = WishListController;

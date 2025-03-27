@@ -1,5 +1,5 @@
 const { deleteImages } = require('../../helpers/media_helper');
-const { BASE_URL } = require('../../config/index');
+const path = require('path');
 
 class ProductService {
   constructor(productRepository, categoryRepository, reviewRepository) {
@@ -11,15 +11,16 @@ class ProductService {
   #handleProductImages(existingProduct, files) {
     let mainImageUrl = existingProduct?.image || '';
     let additionalImageUrls = existingProduct?.images || [];
+    const base = `http://localhost:3000/uploads`;
 
     if (files['image']?.[0]) {
-      mainImageUrl = `${BASE_URL}/${files['image'][0].path}`;
+      mainImageUrl = `${base}/${path.basename(files['image'][0].path)}`;
       if (existingProduct?.image) deleteImages([existingProduct.image]);
     }
 
     if (files['images']) {
       additionalImageUrls = files['images'].map(
-        (image) => `${BASE_URL}/${image.path}`
+        (image) => `${base}/${path.basename(image.path)}`
       );
       if (existingProduct?.images) deleteImages(existingProduct.images);
     }

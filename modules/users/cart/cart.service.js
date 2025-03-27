@@ -14,16 +14,22 @@ class CartService {
     if (!userCartProducts)
       throw new Error('Cart not found', { cause: { status: 404 } });
 
-    userCartProducts.map((cartProduct) => {
+    const updatedcartproduct = userCartProducts.map((cartProduct) => {
       return cartProduct
         ? {
+            id: cartProduct._id,
+            productId: cartProduct.product._id,
             productName: cartProduct.product.name,
             productImage: cartProduct.product.image,
             productPrice: cartProduct.product.price,
-            productName: cartProduct.product.name,
+            quantity: cartProduct.quantity,
+            selectedSize: cartProduct.selectedSize,
+            selectedColour: cartProduct.selectedColour,
             productExist: true,
             productOutOfStock:
               cartProduct.product.countInStock < cartProduct.quantity,
+            reserved: cartProduct.reserved,
+            reservationExpiry: cartProduct.reservationExpiry,
           }
         : {
             ...cartProduct,
@@ -31,7 +37,7 @@ class CartService {
             productOutOfStock: false,
           };
     });
-    return userCartProducts;
+    return updatedcartproduct;
   }
 
   async getUserCartCount(userId) {
@@ -76,6 +82,8 @@ class CartService {
     // Get the user's cart products
     const userCartProducts =
       (await this.cartProductRepository.getCartProductsByUser(user.cart)) || [];
+
+    console.log('userCartProducts', userCartProducts);
 
     // Search if the product already exists in the cart
     const existingCartItem = userCartProducts.find(
@@ -140,18 +148,17 @@ class CartService {
     await this.productRepository.updateProduct(product.id, {
       countInStock: product.countInStock - 1,
     });
-
-    return updatedCartItem;
+    console.log('updatedCartItem ', updatedCartItem);
+    return await this.cartProductRepository.getCartProductsByUser(user.cart);
   }
 
   async modifyProductQuantity(userId, cartProductId, quantity) {
     // Find the user and the cart product
-    
+
     const [user, cartProduct] = await Promise.all([
       this.userRepository.findById(userId),
       this.cartProductRepository.getCartProductById(cartProductId),
     ]);
-   
 
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
     if (!cartProduct)
@@ -168,10 +175,9 @@ class CartService {
       cartProduct.product._id
     );
 
-    if ( quantity > product.countInStock) {
+    if (quantity > product.countInStock) {
       throw new Error('Not enough stock', { cause: { status: 400 } });
     }
-
 
     // Update the cart product
     const updatedCartProduct =
@@ -209,24 +215,39 @@ class CartService {
     }
 
     // Remove the cart product
-    const removedCartProduct = await this.cartProductRepository.removeCartProduct(cartProductId);
+
+    await this.cartProductRepository.removeCartProduct(cartProductId);
 
     // add the quantity of this product to to product stock
     const product = cartProduct.product;
-    if(!product)
-        throw new Error('product not found', { cause: { status: 404 } });
+    if (!product)
+      throw new Error('product not found', { cause: { status: 404 } });
 
     console.log(product);
 
-     await this.productRepository.updateProduct(product._id,{
-        countInStock : product.countInStock + cartProduct.quantity
-    })
+    await this.productRepository.updateProduct(product._id, {
+      countInStock: product.countInStock + cartProduct.quantity,
+    });
 
-    user.cart.pull(cartProductId)
+    user.cart.pull(cartProductId);
     // Update the user's cart
-    await this.userRepository.update(userId, user);
+    await this.userRepository.update(userId, { cart: user.cart });
+    const updatedCartList =
+      await this.cartProductRepository.getCartProductsByUser(user.cart);
+    console.log('updatedCartList ', updatedCartList);
+    return updatedCartList;
+  }
 
-   
+  async clearCart(userId) {
+    const user = await this.userRepository.findById(userId);
+    if (!user) throw new Error('User not found', { cause: { status: 404 } });
+
+    if (user.cart && user.cart.length > 0) {
+      await this.cartProductRepository.removeCartProducts(user.cart);
+    }
+
+    user.cart = [];
+    await this.userRepository.update(userId, { cart: user.cart });
   }
 }
 
