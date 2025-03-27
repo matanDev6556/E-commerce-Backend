@@ -20,20 +20,19 @@ const productSchema = Schema({
 // pre-save hook
 productSchema.pre('save', async function (next) {
   if (this.reviews.length > 0) {
-    await this.populate('reviews');
+    console.log('calculate rating...');
+    await this.populate('reviews'); // populate את הסקירות
 
     const totalRating = this.reviews.reduce(
       (acc, review) => acc + review.rating,
       0
     );
 
-    this.rating = totalRating / this.reviews.length;
     this.rating = parseFloat((totalRating / this.reviews.length).toFixed(1));
     this.numberOfReviews = this.reviews.length;
   }
-  next();
+  next(); 
 });
-
 productSchema.index({ name: 'text', description: 'text' });
 
 productSchema.set('toObject', { virtuals: true });

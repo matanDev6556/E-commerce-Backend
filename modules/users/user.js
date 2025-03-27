@@ -4,7 +4,7 @@ const userSchema = Schema({
   name: { type: String, required: true, trim: true },
   email: { type: String, required: true, trim: true },
   passwordHash: { type: String, required: true },
-  paymentCustomerId : String,
+  paymentCustomerId: String,
   street: String,
   apartment: String,
   city: String,
@@ -25,6 +25,10 @@ const userSchema = Schema({
       productName: { type: String, required: true },
       productImage: { type: String, required: true },
       productPrice: { type: Number, required: true },
+      availableSizes: { type: [String], default: [] },
+      availableColours: { type: [String], default: [] },
+      productExist: { type: Boolean, default: true },
+      productOutOfStock: { type: Boolean, default: false },
     },
   ],
 });
@@ -34,7 +38,7 @@ userSchema.index({ email: 1 }, { unique: true });
 userSchema.set('toObject', {
   virtuals: true,
   transform: (doc, ret) => {
-    delete ret.__v; 
+    delete ret.__v;
     return ret;
   },
 });

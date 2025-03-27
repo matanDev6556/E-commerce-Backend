@@ -8,9 +8,8 @@ class CategoryController {
   getCategories = async (_, res) => {
     try {
       const categories = await this.categoryService.getCategories();
-      return res.json(categories);
+      return res.json({ data: categories });
     } catch (error) {
-      
       return ErrorHandler.handleError(error, res, 'Failed to fetch categories');
     }
   };

@@ -7,8 +7,8 @@ class ErrorHandler {
 
     return res.status(status).json({
       success: false,
-      message,
-      errorDetails,
+      message: message, 
+      errorDetails: errorDetails,  
     });
   }
 }

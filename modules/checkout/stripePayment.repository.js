@@ -6,15 +6,16 @@ class StripePaymentRepository extends PaymentInterface {
   constructor() {
     super();
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-      apiVersion: '2023-10-16',
+      apiVersion: '2025-02-24.acacia',
     });
+    console.log('stripe key ', this.stripe );
   }
 
   async getPaymentProfile(customerId) {
     try {
       const session = await this.stripe.billingPortal.sessions.create({
         customer: customerId,
-        return_url: 'http://localhost:3000/payment-success', 
+        return_url: 'http://localhost:3000/payment-success',
       });
       return { url: session.url };
     } catch (error) {
@@ -40,8 +41,10 @@ class StripePaymentRepository extends PaymentInterface {
   }
 
   async createCheckoutSession(customerId, cartItems) {
-    const successUrl = 'http://0.0.0.0:3000/api/payment-success';
-    const cancelUrl = 'http://0.0.0.0:3000/api/cart';
+   const  successUrl = 
+    'https://4aea-2a06-c701-9966-eb00-3d36-55a4-466-caf6.ngrok-free.app/api/payment-success';
+  const cancelUrl= 
+    'https://4aea-2a06-c701-9966-eb00-3d36-55a4-466-caf6.ngrok-free.app/api/cart';
     try {
       const session = await this.stripe.checkout.sessions.create({
         line_items: cartItems.map((item) => ({

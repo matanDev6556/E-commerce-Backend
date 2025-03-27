@@ -5,18 +5,10 @@ class ProductController {
     this.productService = productService;
   }
 
- 
   getProducts = async (req, res) => {
     try {
-        
-      const { 
-        page = 1, 
-        limit = 10, 
-        search, 
-        category, 
-        criteria
-      } = req.query;
-      
+      const { page = 1, limit = 10, search, category, criteria } = req.query;
+
       // Call service with all filtering options
       const result = await this.productService.getProducts({
         page: parseInt(page),
@@ -24,26 +16,29 @@ class ProductController {
         isAdmin: false,
         searchText: search,
         category,
-        criteria
+        criteria,
       });
-      
-      res.json({
-        success: true,
-        ...result
-      });
+
+      res.json(result);
     } catch (error) {
-      // Error handling logic
-      const status = error.cause?.status || 500;
-      ErrorHandler.handleError(error, res, `Error in getProducts: ${error.message}`);
+      ErrorHandler.handleError(
+        error,
+        res,
+        `Error in getProducts: ${error.message}`
+      );
     }
   };
 
   getProductById = async (req, res) => {
     try {
       const product = await this.productService.getProductById(req.params.id);
-      return res.json(product);
+      return res.json({data :product});
     } catch (error) {
-      ErrorHandler.handleError(error, res, `Error in getProductById: ${error.message}`);
+      ErrorHandler.handleError(
+        error,
+        res,
+        `Error in getProductById: ${error.message}`
+      );
     }
   };
 
@@ -52,13 +47,13 @@ class ProductController {
       const products = await this.productService.getProducts();
       return res.json(products);
     } catch (error) {
-      ErrorHandler.handleError(error, res, `Error in searchProducts: ${error.message}`);
+      ErrorHandler.handleError(
+        error,
+        res,
+        `Error in searchProducts: ${error.message}`
+      );
     }
   };
-
- 
-
-
 }
 
 module.exports = ProductController;

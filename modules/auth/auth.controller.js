@@ -25,11 +25,11 @@ class AuthController {
       );
       res.json({ success: true, data: { ...user._doc, accessToken } });
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'Failed to login ');
+      return ErrorHandler.handleError(error, res, error.message);
     }
   };
 
-  verifyToken = async (req, res, next) => {
+  verifyToken = async (req, res) => {
     try {
       const accessToken = req.headers.authorization
         ?.replace('Bearer ', '')
@@ -37,7 +37,7 @@ class AuthController {
       const isValid = await this.authService.verifyToken(accessToken);
       res.json({ success: true, data: isValid });
     } catch (error) {
-      next(error);
+      return ErrorHandler.handleError(error, res, error.message);
     }
   };
 

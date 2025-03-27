@@ -6,18 +6,22 @@ class WishlistService {
 
   async getUserWishList(userId) {
     // get the user
-    const user = await this.userRepository.findById(userId);
+    console.log('get iwhs list: ');
+    var user = await this.userRepository.findById(userId);
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
 
+    console.log('userr: ', user);
     // get the wish list products of user
     const products = await Promise.all(
       user.wishlist.map((wishProduct) =>
-        this.productRepository.getProductById(wishProduct.id)
+        this.productRepository.getProductById(wishProduct.productId)
       )
     );
 
+    console.log('products: ', products);
+
     // update the wish list if nececery
-     user.wishlist.map((wishProduct, index) => {
+    const updatedWishlist = user.wishlist.map((wishProduct, index) => {
       const product = products[index];
 
       return product
@@ -28,6 +32,8 @@ class WishlistService {
             productName: product.name,
             productExist: true,
             productOutOfStock: product.countInStock < 1,
+            availableSizes: product.sizes || [],
+            availableColours: product.colours || [],
           }
         : {
             ...wishProduct,
@@ -35,15 +41,15 @@ class WishlistService {
             productOutOfStock: false,
           };
     });
-   
+    console.log('user wish lsit ', updatedWishlist);
 
-      return user.wishlist;
+    return updatedWishlist;
   }
 
   async addToWishList(userId, productId) {
     console.log(userId);
     console.log(productId);
-    const user = await this.userRepository.findById(userId);
+    var user = await this.userRepository.findById(userId);
     console.log(user);
     if (!user) throw new Error('User not found', { cause: { status: 404 } });
 
@@ -51,6 +57,7 @@ class WishlistService {
     if (!product)
       throw new Error('Product not found', { cause: { status: 404 } });
 
+    console.log('product ', product);
     const productAlreadyExists = user.wishlist.some(
       (item) => item.productId.toString() === productId.toString()
     );
@@ -59,14 +66,27 @@ class WishlistService {
         cause: { status: 409 },
       });
 
-    user.wishlist.push({
+    
+
+    var wishListProduct = {
       productId,
       productImage: product.image,
       productPrice: product.price,
       productName: product.name,
-    });
+      productExist: product ? true : false,
+      productOutOfStock: product.countInStock < 1,
+      availableSizes: product.sizes || [],
+      availableColours: product.colours || [],
+    };
+    const updatedWishlist = [...user.wishlist, wishListProduct];
 
-    await this.userRepository.update(user.id, user);
+    console.log(wishListProduct);
+
+    const updatedUser = await this.userRepository.update(userId, {
+      wishlist: updatedWishlist,
+    });
+    console.log('User after DB update:', updatedUser);
+    return wishListProduct;
   }
 
   async removeFromWishList(userId, productId) {
@@ -77,7 +97,7 @@ class WishlistService {
       });
 
     const initialLength = user.wishlist.length;
-   
+
     user.wishlist = user.wishlist.filter(
       (item) => item.productId.toString() !== productId.toString()
     );
@@ -87,7 +107,7 @@ class WishlistService {
         cause: { status: 404 },
       });
 
-    await this.userRepository.update(userId,user);
+    await this.userRepository.update(userId, user);
   }
 }
 

@@ -1,12 +1,18 @@
 const jwt = require('jsonwebtoken');
+require('dotenv').config();
 
 class JwtService {
   signAccessToken(payload, expiresIn = '24h') {
-    console.log('sign acesss', this.accessTokenSecret);
+    console.log('signAccessToken: SECRET=', process.env.ACCESS_TOKEN_SECRET); // 🔍 בדיקה
+
+    if (!process.env.ACCESS_TOKEN_SECRET) {
+      throw new Error('Missing ACCESS_TOKEN_SECRET in environment variables');
+    }
+
     return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, { expiresIn });
   }
 
-  // חתימת Refresh Token
+  
   signRefreshToken(payload, expiresIn = '60d') {
     return jwt.sign(payload, process.env.REFRESH_TOKEN_SECRET, { expiresIn });
   }
@@ -20,12 +26,12 @@ class JwtService {
     }
   }
 
-  // אימות טוקן
+  
   verifyToken(token, isRefresh = false) {
     try {
       const secret = isRefresh
-        ? this.refreshTokenSecret
-        : this.accessTokenSecret;
+        ? process.env.REFRESH_TOKEN_SECRET
+        : process.env.ACCESS_TOKEN_SECRET
       return jwt.verify(token, secret);
     } catch (error) {
       console.error('Error verifying token:', error);

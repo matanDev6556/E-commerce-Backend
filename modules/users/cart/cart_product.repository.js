@@ -49,7 +49,15 @@ class CartProductRepository {
     }
   }
 
-  
+  async removeCartProducts(cartProductIds) {
+    try {
+      if (cartProductIds && cartProductIds.length > 0) {
+        await CartProduct.deleteMany({ _id: { $in: cartProductIds } });
+      }
+    } catch (error) {
+      throw new Error('Failed to remove cart products', { cause: error });
+    }
+  }
 }
 
 module.exports = CartProductRepository;

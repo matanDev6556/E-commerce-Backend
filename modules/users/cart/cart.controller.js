@@ -9,7 +9,7 @@ class CartController {
     try {
       const userId = req.params.id;
       const userCart = await this.cartService.getUserCart(userId);
-      return res.json(userCart);
+      return res.json({ data: userCart });
     } catch (error) {
       return ErrorHandler.handleError(error, res, 'Failed to getUserCart');
     }
@@ -19,9 +19,9 @@ class CartController {
     try {
       const userId = req.params.id;
       const cartCount = await this.cartService.getUserCartCount(userId);
-      return res.json(cartCount);
+      return res.json({ data: cartCount });
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'Failed to getUserCartCount');
+      return ErrorHandler.handleError(error, res, error.message);
     }
   };
 
@@ -33,11 +33,7 @@ class CartController {
       );
       return res.json(cartProduct);
     } catch (error) {
-      return ErrorHandler.handleError(
-        error,
-        res,
-        'Failed to gerCartProductById'
-      );
+      return ErrorHandler.handleError(error, res, error.message);
     }
   };
 
@@ -46,10 +42,10 @@ class CartController {
       const userId = req.params.id;
       const cartItem = req.body;
 
-      const updatedCart = await this.cartService.addTocart(userId, cartItem);
-      return res.status(200).json(updatedCart);
+      const newlist = await this.cartService.addTocart(userId, cartItem);
+      return res.status(200).json({ data: newlist });
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'Failed to addTocart');
+      return ErrorHandler.handleError(error, res, error.message);
     }
   };
 
@@ -66,11 +62,7 @@ class CartController {
       );
       return res.json(updatedProduct);
     } catch (error) {
-      return ErrorHandler.handleError(
-        error,
-        res,
-        'Failed to modifyProductQuantity'
-      );
+      return ErrorHandler.handleError(error, res, error.message);
     }
   };
 
@@ -78,10 +70,23 @@ class CartController {
     try {
       const userId = req.params.id;
       const cartProductId = req.params.cartProductId;
-      await this.cartService.removeFromCart(userId, cartProductId);
-      return res.status(204).end();
+      const newlist = await this.cartService.removeFromCart(
+        userId,
+        cartProductId
+      );
+      return res.status(200).json({ data: newlist });
     } catch (error) {
-      return ErrorHandler.handleError(error, res, 'Failed to removeFromCart');
+      return ErrorHandler.handleError(error, res, error.message);
+    }
+  }
+  
+  clearCart = async (req, res) => {
+    try {
+      const userId = req.params.id;
+       await this.cartService.clearCart(userId);
+      return res.status(200).end();
+    } catch (error) {
+      return ErrorHandler.handleError(error, res, 'Failed to clear cart');
     }
   };
 }

@@ -86,9 +86,15 @@ class ProductRepository {
   async updateProduct(id, productData) {
     try {
       this.#validateId(id);
-      const updatedProduct = await Product.findByIdAndUpdate(id, productData, {
-        new: true,
-      });
+
+      const product = await Product.findById(id);
+      if (!product) {
+        throw new Error('Product not found');
+      }
+
+      Object.assign(product, productData);
+
+      const updatedProduct = await product.save();
       return updatedProduct;
     } catch (error) {
       console.error(error);

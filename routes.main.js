@@ -9,6 +9,22 @@ const orderRoutes = require('./modules/order/order.routes');
 const productRoutes = require('./modules/product/product.routes');
 const checkoutRoutes = require('./modules/checkout/checkout.routes');
 
+router.post(
+  `${process.env.API_URL}/checkout/webhook`,
+  express.raw({ type: 'application/json' })
+);
+
+router.get('/payment-success', (req, res) => {
+  console.log('Payment success endpoint hit');
+  res.status(200).json({ message: 'Payment successful' });
+});
+
+// Endpoint עבור cancelUrl
+router.get('/cart', (req, res) => {
+  console.log('Cart endpoint hit');
+  res.status(200).json({ message: 'Payment cancelled, redirected to cart' });
+});
+
 // admin
 router.use('/admin', adminRoutes);
 
@@ -29,7 +45,5 @@ router.use('/orders', orderRoutes);
 
 // checkout
 router.use('/checkout', checkoutRoutes);
-
-
 
 module.exports = router;
